@@ -282,7 +282,7 @@ function DraggableText({ text, color, containerSize, position, scale = 1, rotati
 }
 
 /* ─── RECORD DETAIL ─── */
-function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEdit }) {
+function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEdit, onShare }) {
   const [spinning, setSpinning] = useState(false);
   const [viewMode, setViewMode] = useState("vinyl");
   const [editing, setEditing] = useState(initialEdit || !record.song);
@@ -379,22 +379,19 @@ function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEd
         {/* ── ALBUM SLEEVE — this whole block is captured for sharing ── */}
         {viewMode === "polaroid" ? (
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-            {/* ── ALBUM SLEEVE — this whole block is captured for sharing ── */}
-            {viewMode === "polaroid" ? (
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-                {/* We use a fixed 4:5 ratio for the share card to match social media 'card' aesthetics */}
-                <div ref={shareRef} style={{
-                  background: PAPER,
-                  width: 400,
-                  aspectRatio: "4 / 5",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "20px",
-                  flexShrink: 0,
-                  boxSizing: "border-box"
-                }}>
+            {/* We use a fixed 4:5 ratio for the share card to match social media 'card' aesthetics */}
+            <div ref={shareRef} style={{
+              background: PAPER,
+              width: 400,
+              aspectRatio: "4 / 5",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px",
+              flexShrink: 0,
+              boxSizing: "border-box"
+            }}>
                   <div style={{
                     display: "block", textAlign: "center", background: "#fff",
                     padding: "20px 20px 60px 20px",
@@ -515,8 +512,8 @@ function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEd
                           {yearLabel} · {monthLabel}
                         </div>
                       </div>
-        </div>
-
+                    )}
+                  </div>
                 </div>
               </div>
             )}
