@@ -353,15 +353,6 @@ function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEd
         </button>
         <div style={{ color: DARK, fontSize: 11, letterSpacing: 3, opacity: 0.6, fontFamily: "'Space Mono', monospace" }}>{yearLabel} <span style={{ color: POINT_COLOR }}>·</span> {monthLabel}</div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {!editing && (
-            <button onClick={onShare} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: DARK }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-          )}
           <button onClick={() => setViewMode(v => v === "vinyl" ? "polaroid" : "vinyl")} style={{ background: "transparent", border: "1px solid #ddd", color: DARK, fontSize: 9, letterSpacing: 2, cursor: "pointer", padding: "6px 12px", borderRadius: 0, fontFamily: "'Space Mono', monospace" }}>
             {viewMode === "vinyl" ? "폴라로이드" : "바이닐"}
           </button>
@@ -369,7 +360,7 @@ function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEd
             {editing ? "보기" : "편집"}
           </button>
           {!editing && (record.song || record.diary) && (
-            <button onClick={() => setShowShare(true)} style={{ background: DARK, border: "none", color: "#fff", fontSize: 9, letterSpacing: 2, cursor: "pointer", padding: "6px 12px", borderRadius: 0, fontFamily: "'Space Mono', monospace" }}>공유</button>
+            <button onClick={() => setShowShare(true)} style={{ background: DARK, border: "none", color: "#fff", fontSize: 9, letterSpacing: 2, cursor: "pointer", padding: "6px 12px", borderRadius: 0, fontFamily: "'Space Mono', monospace" }}>저장</button>
           )}
         </div>
       </div>
@@ -661,7 +652,7 @@ function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEd
 }
 
       /* ─── YEAR DRAWER (month spines) ─── */
-      function YearDrawer({year, data, onBack, onSelectMonth, onShare}) {
+      function YearDrawer({year, data, onBack, onSelectMonth}) {
 const [openMonth, setOpenMonth] = useState(null);
       const yearData = data[year] || { };
 
@@ -691,19 +682,8 @@ if (openMonth === m) setOpenMonth(null);
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.5px", color: DARK, marginBottom: 2, fontFamily: "system-ui, -apple-system, sans-serif" }}>VINYL DIARY</div>
             <div style={{ fontSize: 24, fontWeight: "bold", color: "#888", letterSpacing: -1, fontFamily: "'Space Mono', monospace" }}>{year}</div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button onClick={onShare} style={{
-              background: "none", border: "none", cursor: "pointer", padding: 0, color: DARK
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-            <div style={{ fontSize: 9, color: "#bbb", letterSpacing: 2 }}>
-              {Object.keys(yearData).length}장 기록됨
-            </div>
+          <div style={{ fontSize: 9, color: "#bbb", letterSpacing: 2 }}>
+            {Object.keys(yearData).length}장 기록됨
           </div>
         </div>
 
@@ -837,7 +817,7 @@ if (openMonth === m) setOpenMonth(null);
 }
 
       /* ─── YEAR GRID HOME ─── */
-      function YearGrid({data, onSelectYear, onAddYear, onDeleteYear, onShare}) {
+      function YearGrid({data, onSelectYear, onAddYear, onDeleteYear}) {
 const years = Object.keys(data).map(Number).sort((a,b) => b - a);
       const [deleteMode, setDeleteMode] = useState(false);
 
@@ -871,18 +851,6 @@ const years = Object.keys(data).map(Number).sort((a,b) => b - a);
               </svg>
             )}
           </button>
-          {!deleteMode && (
-            <button onClick={onShare} style={{
-              background: "none", border: "none", cursor: "pointer", padding: 0,
-              color: "#1a1a1a", display: "flex", alignItems: "center"
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-          )}
         </div>
 
         {/* Main title */}
@@ -981,48 +949,11 @@ const [data, setData] = useState(() => {
   const saved = localStorage.getItem("vinyl-diary-data");
       return saved ? JSON.parse(saved) : INIT_DATA;
 });
-      const [sharedData, setSharedData] = useState(null);
 
 useEffect(() => {
-  // Check for shared data in URL
-  const params = new URLSearchParams(window.location.search);
-      const rawData = params.get("d");
-      if (rawData) {
-    try {
-      const decoded = JSON.parse(decodeURIComponent(escape(atob(rawData))));
-      setSharedData(decoded);
-    } catch (e) {
-        console.error("Failed to decode shared data", e);
-    }
-  }
-}, []);
+  localStorage.setItem("vinyl-diary-data", JSON.stringify(data));
+}, [data]);
 
-useEffect(() => {
-  if (!sharedData) {
-        localStorage.setItem("vinyl-diary-data", JSON.stringify(data));
-  }
-}, [data, sharedData]);
-
-      function handleShareDiary() {
-  try {
-    // We strip photos for the link to keep it within URL length limits
-    const dataToShare = JSON.parse(JSON.stringify(data));
-    Object.keys(dataToShare).forEach(y => {
-        Object.keys(dataToShare[y]).forEach(m => {
-          if (dataToShare[y][m].photo) dataToShare[y][m].photo = "stripped";
-        });
-    });
-
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dataToShare))));
-      const url = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
-    
-    navigator.clipboard.writeText(url).then(() => {
-        window.alert("일기장 공유 링크가 복사되었습니다! (텍스트 중심 공유)");
-    });
-  } catch (e) {
-        window.alert("공유 링크 생성에 실패했습니다.");
-  }
-}
       const [screen, setScreen] = useState("home"); // home | year | detail
       const [selectedYear, setSelectedYear] = useState(null);
       const [selectedMonth, setSelectedMonth] = useState(null);
@@ -1069,68 +1000,46 @@ if (!window.confirm(`${y}년 기록을 삭제할까요?`)) return;
 setData(d => { const n ={...d}; delete n[y]; return n; });
 }
 
-      if (sharedData) {
-  return (
-      <div style={{ position: "relative" }}>
-        <div style={{ background: POINT_COLOR, color: "#fff", padding: "8px", fontSize: 10, textAlign: "center", letterSpacing: 2 }}>
-          공유된 일기장을 보고 있습니다
-          <button onClick={() => { setSharedData(null); window.history.pushState({}, "", window.location.pathname); }} style={{ marginLeft: 12, background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", padding: "2px 8px", cursor: "pointer", fontSize: 9 }}>내 일기장으로 돌아가기</button>
-        </div>
-        <YearGrid
-          data={sharedData}
-          onSelectYear={y => { setSelectedYear(y); setScreen("year"); }}
-          onAddYear={() => { }}
-          onDeleteYear={() => { }}
-          onShare={handleShareDiary}
-        />
-      </div>
-      );
-}
-
       if (screen === "home") {
   return (
-      <YearGrid
+    <YearGrid
       data={data}
       onSelectYear={y => { setSelectedYear(y); setScreen("year"); }}
       onAddYear={handleAddYear}
       onDeleteYear={handleDeleteYear}
-      onShare={handleShareDiary}
     />
-      );
+  );
 }
 
-      if (screen === "year") {
+if (screen === "year") {
   return (
-      <YearDrawer
-        year={selectedYear}
-        data={sharedData || data}
-        onBack={() => setScreen("home")}
-        onSelectMonth={handleSelectMonth}
-        onShare={handleShareDiary}
-      />
-      );
+    <YearDrawer
+      year={selectedYear}
+      data={data}
+      onBack={() => setScreen("home")}
+      onSelectMonth={handleSelectMonth}
+    />
+  );
 }
 
-      if (screen === "detail") {
-  const currentData = sharedData || data;
-      const record = (currentData[selectedYear]?.[selectedMonth]) || { };
-      const colIdx = (selectedMonth-1) % SPINE_COLORS.length;
-      const enriched = {
-        ...record,
-        _spineColor: record._spineColor || SPINE_COLORS[colIdx],
-      _accent: record._accent || ACCENTS[colIdx],
+if (screen === "detail") {
+  const record = (data[selectedYear]?.[selectedMonth]) || {};
+  const colIdx = (selectedMonth - 1) % SPINE_COLORS.length;
+  const enriched = {
+    ...record,
+    _spineColor: record._spineColor || SPINE_COLORS[colIdx],
+    _accent: record._accent || ACCENTS[colIdx],
   };
-      return (
-      <RecordDetail
-        record={enriched}
-        monthLabel={MONTHS_KR[selectedMonth - 1]}
-        yearLabel={String(selectedYear)}
-        onBack={() => setScreen("year")}
-        onSave={sharedData ? () => { } : handleSaveRecord}
-        initialEdit={startEdit}
-        onShare={handleShareDiary}
-      />
-      );
+  return (
+    <RecordDetail
+      record={enriched}
+      monthLabel={MONTHS_KR[selectedMonth - 1]}
+      yearLabel={String(selectedYear)}
+      onBack={() => setScreen("year")}
+      onSave={handleSaveRecord}
+      initialEdit={startEdit}
+    />
+  );
 }
 
       return null;
