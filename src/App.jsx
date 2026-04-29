@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 /* ─── CONSTANTS ─── */
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
@@ -26,18 +26,8 @@ const ACCENTS = [
 "#44505b","#3a4752","#303d49","#263440",
 ];
 
-/* ─── SAMPLE DATA ─── */
-const INIT_DATA = {
-2026: {
-3: { song:"Cigarettes After Sex", artist:"K.", mood:"몽롱", diary:"창밖에 비가 내렸다. 이 노래는 항상 같은 기억을 꺼낸다.", photo:null },
-4: { song:"Lua", artist:"Bright Eyes", mood:"따뜻", diary:"친구와 오래 이야기했다. 이런 날이 더 많았으면.", photo:null },
-},
-2025: {
-1: { song:"Motion Picture Soundtrack", artist:"Radiohead", mood:"몽롱", diary:"새해 첫날, 아무것도 하지 않았다. 그래도 괜찮았다.", photo:null },
-6: { song:"Skinny Love", artist:"Bon Iver", mood:"날카로움", diary:"말하지 못한 것들이 쌓인 날이었다.", photo:null },
-11: { song:"The Night Will Always Win", artist:"Manchester Orchestra", mood:"쓸쓸", diary:"혼자 걷다 보니 어느새 새벽이었다.", photo:null },
-},
-};
+/* ─── EMPTY INITIAL DATA ─── */
+const INIT_DATA = {};
 
 /* ─── VINYL SVG ─── */
 function VinylSVG({ spineColor, accent, size = 200 }) {
@@ -911,7 +901,14 @@ return (
 
 /* ─── ROOT ─── */
 export default function App() {
-const [data, setData] = useState(INIT_DATA);
+const [data, setData] = useState(() => {
+  const saved = localStorage.getItem("vinyl-diary-data");
+  return saved ? JSON.parse(saved) : INIT_DATA;
+});
+
+useEffect(() => {
+  localStorage.setItem("vinyl-diary-data", JSON.stringify(data));
+}, [data]);
 const [screen, setScreen] = useState("home"); // home | year | detail
 const [selectedYear, setSelectedYear] = useState(null);
 const [selectedMonth, setSelectedMonth] = useState(null);
