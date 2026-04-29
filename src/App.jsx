@@ -60,9 +60,12 @@ fill="rgba(255,255,255,0.03)" transform={`rotate(-35 ${cx} ${cx})`} />
 /* ─── GRAYSCALE IMAGE with sepia tint ─── */
 function GrayscaleImg({ src, style }) {
 return (
-<img src={src} alt="" style={{
+<div style={{
 ...style,
-objectFit: "cover",
+backgroundImage: `url(${src})`,
+backgroundSize: "cover",
+backgroundPosition: "center",
+backgroundRepeat: "no-repeat",
 }} />
 );
 }
@@ -155,11 +158,14 @@ s.onload = res; s.onerror = rej;
 document.head.appendChild(s);
 });
 }
-const canvas = await window.html2canvas(shareRef.current, {
-scale: 3,
-useCORS: true,
-backgroundColor: PAPER,
-logging: false,
+const el = shareRef.current;
+const canvas = await window.html2canvas(el, {
+  scale: 2,
+  useCORS: true,
+  backgroundColor: PAPER,
+  scrollX: 0,
+  scrollY: 0,
+  logging: false,
 });
 setDataUrl(canvas.toDataURL("image/png"));
 } catch(e) {
@@ -314,7 +320,7 @@ reader.onload = ev => {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
-    ctx.filter = 'grayscale(100%) sepia(20%) brightness(0.85) contrast(1.1)';
+    // Filter applied in GrayscaleImg
     ctx.drawImage(img, 0, 0, w, h);
     setForm(f => ({ ...f, photo: canvas.toDataURL("image/jpeg", 0.85), showPhoto: true }));
   };
@@ -364,39 +370,74 @@ return (
     {/* ── ALBUM SLEEVE — this whole block is captured for sharing ── */}
     {viewMode === "polaroid" ? (
       <div style={{ display:"flex", justifyContent:"center", marginBottom:20 }}>
-        <div ref={shareRef} style={{ display:"flex", flexDirection:"column", alignItems:"center", background:"#fff", padding:"16px 16px 40px 16px", boxShadow:"0 8px 30px rgba(0,0,0,0.12)" }}>
-          {/* Photo */}
-          <div style={{ width: 280, height: 280, background: hasPhoto ? "#111" : "#e8e5e0", overflow:"hidden" }}>
-            {hasPhoto ? (
-              <GrayscaleImg src={d.photo} style={{ width:"100%", height:"100%" }} />
-            ) : (
-              <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ color:"#A5ACB5", fontSize:10, letterSpacing:2 }}>사진 비어있음</span>
+    {/* ── ALBUM SLEEVE — this whole block is captured for sharing ── */}
+    {viewMode === "polaroid" ? (
+      <div style={{ display:"flex", justifyContent:"center", marginBottom:20 }}>
+        {/* We use a fixed 4:5 ratio for the share card to match social media 'card' aesthetics */}
+        <div ref={shareRef} style={{ 
+          background: PAPER, 
+          width: 400, 
+          aspectRatio: "4 / 5",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "20px",
+          flexShrink: 0,
+          boxSizing: "border-box"
+        }}>
+          <div style={{ 
+            display:"block", textAlign:"center", background:"#fff", 
+            padding:"20px 20px 60px 20px", 
+            boxShadow:"0 20px 60px rgba(0,0,0,0.12)",
+            border: "1px solid rgba(0,0,0,0.04)",
+            width: 320,
+            boxSizing: "border-box"
+          }}>
+            {/* Photo */}
+            <div style={{ width: 280, height: 280, background: hasPhoto ? "#0D1217" : "#e8e5e0", overflow:"hidden", margin: "0 auto" }}>
+              {hasPhoto ? (
+                <GrayscaleImg src={d.photo} style={{ width:"100%", height:"100%" }} />
+              ) : (
+                <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <span style={{ color:"#A5ACB5", fontSize:10, letterSpacing:2 }}>사진 비어있음</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Diary & Date */}
+            {(!editing) && (d.diary || yearLabel) && (
+              <div style={{ marginTop: 32, textAlign: "center", display: "flex", flexDirection: "column", gap: 16 }}>
+                {d.diary && (
+                  <div style={{ fontSize: 13, color: DARK, lineHeight: 1.8, whiteSpace: "pre-wrap", wordBreak: "keep-all", padding: "0 10px" }}>
+                    {d.diary}
+                  </div>
+                )}
+                <div style={{ fontSize: 10, color: "#bbb", letterSpacing: 2, fontFamily: "'Courier New',monospace", marginTop: 8 }}>
+                  {yearLabel} · {monthLabel}
+                </div>
               </div>
             )}
           </div>
-          
-          {/* Diary & Date */}
-          {(!editing) && (d.diary || yearLabel) && (
-            <div style={{ marginTop: 24, textAlign: "center", maxWidth: 280, display: "flex", flexDirection: "column", gap: 12 }}>
-              {d.diary && (
-                <div style={{ fontSize: 13, color: DARK, lineHeight: 1.7, whiteSpace: "pre-wrap", wordBreak: "keep-all" }}>
-                  {d.diary}
-                </div>
-              )}
-              <div style={{ fontSize: 10, color: "#aaa", letterSpacing: 2, fontFamily: "'Courier New',monospace" }}>
-                {yearLabel} · {monthLabel}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     ) : (
     <div style={{ display:"flex", justifyContent:"center", marginBottom:20 }}>
-      <div ref={shareRef} style={{ display:"inline-flex", flexDirection:"column", alignItems:"center", position:"relative", background:PAPER, padding:"40px 40px 30px 40px" }}>
+      <div ref={shareRef} style={{ 
+        display:"flex", 
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        position:"relative", 
+        background:PAPER, 
+        width: 600, 
+        aspectRatio: "1 / 1",
+        flexShrink: 0 
+      }}>
         
-        {/* Cover + Vinyl Wrapper */}
-        <div style={{ display:"flex", alignItems:"center", position:"relative", paddingRight: 110 }}>
+        <div style={{ textAlign: "center" }}>
+          {/* Cover + Vinyl Wrapper */}
+          <div style={{ display:"inline-flex", alignItems:"center", position:"relative", paddingRight: 110 }}>
           {/* Vinyl peeking right */}
           <div onClick={() => setSpinning(s => !s)} style={{
             position:"absolute", right:0, top:"50%", transform:"translateY(-50%)",
@@ -463,7 +504,7 @@ return (
               {yearLabel} · {monthLabel}
             </div>
           </div>
-        )}
+        </div>
 
       </div>
     </div>
@@ -807,6 +848,18 @@ return (
         </svg>
       )}
     </button>
+    {!deleteMode && (
+      <button onClick={handleShareDiary} style={{
+        background:"none", border:"none", cursor:"pointer", padding:0,
+        color: "#1a1a1a", display: "flex", alignItems: "center"
+      }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+      </button>
+    )}
   </div>
 
   {/* Main title */}
@@ -905,10 +958,48 @@ const [data, setData] = useState(() => {
   const saved = localStorage.getItem("vinyl-diary-data");
   return saved ? JSON.parse(saved) : INIT_DATA;
 });
+const [sharedData, setSharedData] = useState(null);
 
 useEffect(() => {
-  localStorage.setItem("vinyl-diary-data", JSON.stringify(data));
-}, [data]);
+  // Check for shared data in URL
+  const params = new URLSearchParams(window.location.search);
+  const rawData = params.get("d");
+  if (rawData) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(escape(atob(rawData))));
+      setSharedData(decoded);
+    } catch (e) {
+      console.error("Failed to decode shared data", e);
+    }
+  }
+}, []);
+
+useEffect(() => {
+  if (!sharedData) {
+    localStorage.setItem("vinyl-diary-data", JSON.stringify(data));
+  }
+}, [data, sharedData]);
+
+function handleShareDiary() {
+  try {
+    // We strip photos for the link to keep it within URL length limits
+    const dataToShare = JSON.parse(JSON.stringify(data));
+    Object.keys(dataToShare).forEach(y => {
+      Object.keys(dataToShare[y]).forEach(m => {
+        if (dataToShare[y][m].photo) dataToShare[y][m].photo = "stripped"; 
+      });
+    });
+
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dataToShare))));
+    const url = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+    
+    navigator.clipboard.writeText(url).then(() => {
+      window.alert("일기장 공유 링크가 복사되었습니다! (텍스트 중심 공유)");
+    });
+  } catch (e) {
+    window.alert("공유 링크 생성에 실패했습니다.");
+  }
+}
 const [screen, setScreen] = useState("home"); // home | year | detail
 const [selectedYear, setSelectedYear] = useState(null);
 const [selectedMonth, setSelectedMonth] = useState(null);
@@ -955,46 +1046,64 @@ if (!window.confirm(`${y}년 기록을 삭제할까요?`)) return;
 setData(d => { const n ={...d}; delete n[y]; return n; });
 }
 
+if (sharedData) {
+  return (
+    <div style={{ position: "relative" }}>
+      <div style={{ background: BURGUNDY, color: "#fff", padding: "8px", fontSize: 10, textAlign: "center", letterSpacing: 2 }}>
+        공유된 일기장을 보고 있습니다
+        <button onClick={() => { setSharedData(null); window.history.pushState({}, "", window.location.pathname); }} style={{ marginLeft: 12, background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", padding: "2px 8px", cursor: "pointer", fontSize: 9 }}>내 일기장으로 돌아가기</button>
+      </div>
+      <YearGrid
+        data={sharedData}
+        onSelectYear={y => { setSelectedYear(y); setScreen("year"); }}
+        onAddYear={() => {}}
+        onDeleteYear={() => {}}
+      />
+    </div>
+  );
+}
+
 if (screen === "home") {
-return (
-<YearGrid
-data={data}
-onSelectYear={y => { setSelectedYear(y); setScreen("year"); }}
-onAddYear={handleAddYear}
-onDeleteYear={handleDeleteYear}
-/>
-);
+  return (
+    <YearGrid
+      data={data}
+      onSelectYear={y => { setSelectedYear(y); setScreen("year"); }}
+      onAddYear={handleAddYear}
+      onDeleteYear={handleDeleteYear}
+    />
+  );
 }
 
 if (screen === "year") {
-return (
-<YearDrawer
-year={selectedYear}
-data={data}
-onBack={() => setScreen("home")}
-onSelectMonth={handleSelectMonth}
-/>
-);
+  return (
+    <YearDrawer
+      year={selectedYear}
+      data={sharedData || data}
+      onBack={() => setScreen("home")}
+      onSelectMonth={handleSelectMonth}
+    />
+  );
 }
 
 if (screen === "detail") {
-const record = (data[selectedYear]?.[selectedMonth]) || {};
-const colIdx = (selectedMonth-1) % SPINE_COLORS.length;
-const enriched = {
-...record,
-_spineColor: record._spineColor || SPINE_COLORS[colIdx],
-_accent: record._accent || ACCENTS[colIdx],
-};
-return (
-<RecordDetail
-record={enriched}
-monthLabel={MONTHS_KR[selectedMonth-1]}
-yearLabel={String(selectedYear)}
-onBack={() => setScreen("year")}
-onSave={handleSaveRecord}
-initialEdit={startEdit}
-/>
-);
+  const currentData = sharedData || data;
+  const record = (currentData[selectedYear]?.[selectedMonth]) || {};
+  const colIdx = (selectedMonth-1) % SPINE_COLORS.length;
+  const enriched = {
+    ...record,
+    _spineColor: record._spineColor || SPINE_COLORS[colIdx],
+    _accent: record._accent || ACCENTS[colIdx],
+  };
+  return (
+    <RecordDetail
+      record={enriched}
+      monthLabel={MONTHS_KR[selectedMonth-1]}
+      yearLabel={String(selectedYear)}
+      onBack={() => setScreen("year")}
+      onSave={sharedData ? () => {} : handleSaveRecord}
+      initialEdit={startEdit}
+    />
+  );
 }
 
 return null;
