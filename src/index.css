@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Noto Serif KR', serif;
+  background-color: #F0F2F5;
+  color: #111;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+.mono {
+  font-family: 'Space Mono', monospace;
+}
