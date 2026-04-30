@@ -651,293 +651,307 @@ function RecordDetail({ record, monthLabel, yearLabel, onBack, onSave, initialEd
       );
 }
 
-      /* ─── YEAR DRAWER (month spines) ─── */
-      function YearDrawer({year, data, onBack, onSelectMonth}) {
-const [openMonth, setOpenMonth] = useState(null);
-      const yearData = data[year] || { };
+/* ─── MONTHLY CURATION GRID (White Cube Gallery) ─── */
+function MonthlyTile({ monthIdx, year, record, onClick, onAdd, spineColor }) {
+  const hasRecord = !!record.song;
+  const monthLabel = MONTHS[monthIdx];
+  const [isPressed, setIsPressed] = useState(false);
 
-      function toggleMonth(m) {
-if (openMonth === m) setOpenMonth(null);
-      else setOpenMonth(m);
-}
-
-      const openRecord = openMonth !== null ? (yearData[openMonth] || { }) : null;
-
-      return (
-      <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Space Mono', monospace" }}>
-        <style>{`@keyframes popIn { from{opacity:0;transform:scale(0.94) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} } @keyframes fadeDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} } ::-webkit-scrollbar { height:3px; } ::-webkit-scrollbar-thumb { background:#ddd; }`}</style>
-
-        {/* Header */}
-        <div style={{
-          padding: "28px 22px 18px",
-          display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-          borderBottom: "1px solid #DFE3E8",
-        }}>
-          <div>
-            <button onClick={onBack} style={{
-              background: "none", border: "none", color: "#aaa",
-              fontSize: 9, letterSpacing: 4, cursor: "pointer",
-              fontFamily: "'Space Mono', monospace", padding: 0, marginBottom: 16, display: "block",
-            }}>← 연도</button>
-            <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.5px", color: DARK, marginBottom: 2, fontFamily: "system-ui, -apple-system, sans-serif" }}>VINYL DIARY</div>
-            <div style={{ fontSize: 24, fontWeight: "bold", color: "#888", letterSpacing: -1, fontFamily: "'Space Mono', monospace" }}>{year}</div>
-          </div>
-          <div style={{ fontSize: 9, color: "#bbb", letterSpacing: 2 }}>
-            {Object.keys(yearData).length}장 기록됨
-          </div>
-        </div>
-
-        {/* THE SHELF */}
-        <div style={{ padding: "16px 16px 0" }}>
-          <div style={{ height: 5, background: "#A9B0BA", borderRadius: "3px 3px 0 0", boxShadow: "0 1px 0 rgba(0,0,0,0.1)" }} />
-          <div style={{
-            background: "#fff", border: "1px solid #DFE3E8", borderTop: "none",
-            padding: "0 12px", overflowX: "auto",
-          }}>
-            <div style={{
-              display: "flex", gap: 6,
-              alignItems: "flex-end",
-              minHeight: 360,
-              paddingBottom: 18, paddingTop: 24,
-            }}>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map(m => {
-                const hasRec = !!yearData[m];
-                const colIdx = (m - 1) % SPINE_COLORS.length;
-                return (
-                  <RecordSpine key={m}
-                    monthIdx={m - 1}
-                    hasRecord={hasRec}
-                    isOpen={openMonth === m}
-                    onClick={() => hasRec ? toggleMonth(m) : onSelectMonth(m, false)}
-                    spineColor={SPINE_COLORS[colIdx]}
-                    accent={ACCENTS[colIdx]}
-                  />
-                );
-              })}
-            </div>
-          </div>
-          <div style={{ height: 12, background: "#A9B0BA", borderRadius: "0 0 5px 5px", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }} />
-        </div>
-
-        {/* Open record preview */}
-        {openMonth !== null && (
-          <div key={openMonth} style={{
-            margin: "16px 16px 0",
-            background: "#fff", border: "1px solid #DFE3E8",
-            borderRadius: 12, overflow: "hidden",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04)",
-            animation: "popIn 0.28s cubic-bezier(0.34,1.4,0.64,1)",
-          }}>
-            <div style={{ height: 3, background: `linear-gradient(90deg, ${BG}, ${SPINE_COLORS[(openMonth - 1) % SPINE_COLORS.length]})` }} />
-
-            <div style={{ padding: "18px 20px", display: "flex", gap: 16, alignItems: "center" }}>
-              <div style={{
-                borderRadius: "50%",
-                boxShadow: "0 3px 14px rgba(0,0,0,0.2)",
-                flexShrink: 0,
+  return (
+    <div 
+      onClick={hasRecord ? onClick : onAdd}
+      onPointerDown={() => setIsPressed(true)}
+      onPointerUp={() => setIsPressed(false)}
+      onPointerLeave={() => setIsPressed(false)}
+      style={{
+        position: "relative",
+        width: "100%",
+        aspectRatio: "1/1",
+        cursor: "pointer",
+        transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease",
+        transform: isPressed ? "scale(0.95) translateY(2px)" : "scale(1) translateY(0)",
+        perspective: "1000px",
+      }}
+    >
+      <div style={{
+        width: "100%",
+        height: "100%",
+        background: hasRecord ? (record.photo ? "#000" : CREAM) : "rgba(255,255,255,0.4)",
+        border: hasRecord ? "none" : "1px dashed rgba(0,0,0,0.08)",
+        borderRadius: "2px",
+        overflow: "hidden",
+        position: "relative",
+        // Tactile Bezel & Shadow
+        boxShadow: hasRecord 
+          ? "0 10px 20px -5px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.1)"
+          : "inset 0 1px 3px rgba(0,0,0,0.02)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        {hasRecord ? (
+          <>
+            {record.photo ? (
+              <GrayscaleImg src={record.photo} style={{ width: "100%", height: "100%", opacity: 0.9, filter: "contrast(1.1) brightness(0.9)" }} />
+            ) : (
+              <div style={{ 
+                width: "100%", height: "100%", 
+                display: "flex", flexDirection: "column", 
+                alignItems: "center", justifyContent: "center",
+                padding: 12, textAlign: "center",
+                background: `linear-gradient(135deg, ${CREAM} 0%, #DFE3E8 100%)`
               }}>
-                <VinylSVG
-                  spineColor={SPINE_COLORS[(openMonth - 1) % SPINE_COLORS.length]}
-                  accent={ACCENTS[(openMonth - 1) % ACCENTS.length]}
-                  size={100}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 9, letterSpacing: 3, color: "#bbb", marginBottom: 6 }}>
-                  {year} · {MONTHS_KR[openMonth - 1]}
-                </div>
-                <div style={{
-                  fontSize: 15, fontWeight: "bold", color: "#1a1a1a", marginBottom: 3,
-                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"
-                }}>
-                  {openRecord.song || "—"}
-                </div>
-                <div style={{ fontSize: 11, color: "#999", marginBottom: 10 }}>
-                  {openRecord.artist}
-                </div>
-                {openRecord.mood && (
-                  <div style={{
-                    display: "inline-block", padding: "3px 12px", borderRadius: 20,
-                    background: `${BG}18`, border: `1px solid ${BG}44`,
-                    color: DARK, fontSize: 10,
-                  }}>{openRecord.mood}</div>
-                )}
-              </div>
-            </div>
-
-            {openRecord.diary && (
-              <div style={{
-                margin: "0 20px 16px", padding: "12px 14px",
-                background: "#F4F6F9", borderRadius: 8, borderLeft: `3px solid ${POINT_COLOR}99`
-              }}>
-                <div style={{ fontSize: 11, color: "#666", lineHeight: 1.8 }}>
-                  {openRecord.diary.length > 80 ? openRecord.diary.slice(0, 80) + "..." : openRecord.diary}
-                </div>
+                <div style={{ fontSize: 9, fontWeight: "800", color: DARK, opacity: 0.8, letterSpacing: "-0.2px" }}>{record.song}</div>
               </div>
             )}
-
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => onSelectMonth(openMonth, true)} style={{
-                flex: 1, padding: "12px",
-                background: POINT_COLOR, border: "none",
-                color: CREAM, fontSize: 10, letterSpacing: 3,
-                cursor: "pointer", fontFamily: "'Space Mono', monospace",
-              }}>
-                자세히 보기
-              </button>
-              <button onClick={() => onSelectMonth(openMonth, true, true)} style={{
-                flex: 1, padding: "12px",
-                background: "#fff", border: `1px solid ${POINT_COLOR}`,
-                color: POINT_COLOR, fontSize: 10, letterSpacing: 3,
-                cursor: "pointer", fontFamily: "'Space Mono', monospace",
-              }}>
-                편집하기
-              </button>
-            </div>
+            {/* Spine Highlight */}
+            <div style={{ 
+              position: "absolute", left: 0, top: 0, bottom: 0, width: 4, 
+              background: spineColor, 
+              boxShadow: "1px 0 3px rgba(0,0,0,0.2)"
+            }} />
+          </>
+        ) : (
+          <div style={{ 
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+            opacity: 0.15
+          }}>
+            <span style={{ fontSize: 7, letterSpacing: 2, fontWeight: "900", color: DARK }}>{monthLabel}</span>
+            <div style={{ width: 12, height: 1, background: DARK }} />
           </div>
         )}
 
-        {/* Add new month button */}
-        <div style={{ padding: "16px 16px 40px" }}>
-          <div style={{ fontSize: 8, color: "#ccc", letterSpacing: 2, marginBottom: 10, textAlign: "center" }}>
-            비어있는 달을 눌러 기록을 추가하세요
-          </div>
-          <button onClick={() => {
-            const empty = Array.from({ length: 12 }, (_, i) => i + 1).find(m => !yearData[m]);
-            if (empty) onSelectMonth(empty, false);
-          }} style={{
-            width: "100%", padding: "12px",
-            background: "transparent", border: "1.5px dashed #C4CAD2",
-            borderRadius: 8, color: "#A5ACB5", fontSize: 10,
-            cursor: "pointer", fontFamily: "'Space Mono', monospace", letterSpacing: 4,
-          }}>+ 새 달 기록하기</button>
-        </div>
+        {/* Gloss / Physicality Overlay */}
+        <div style={{ 
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 40%, rgba(0,0,0,0.03) 100%)"
+        }} />
       </div>
-      );
+      
+      {/* Label below tile */}
+      <div style={{ 
+        marginTop: 6, textAlign: "center", fontSize: 8, 
+        letterSpacing: 1, color: hasRecord ? DARK : "#aaa", 
+        fontWeight: hasRecord ? "700" : "400",
+        fontFamily: "'Space Mono', monospace"
+      }}>
+        {monthLabel}
+      </div>
+    </div>
+  );
 }
 
-      /* ─── YEAR GRID HOME ─── */
+function YearDrawer({ year, data, onBack, onSelectMonth }) {
+  const yearData = data[year] || {};
+  const recordedCount = Object.keys(yearData).length;
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F9FAFB", fontFamily: "'Space Mono', monospace" }}>
+      <style>{`
+        @keyframes gridFadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      {/* Header - White Cube Style */}
+      <div style={{
+        padding: "40px 24px 32px",
+        background: "#fff",
+        borderBottom: "1px solid #E5E7EB",
+      }}>
+        <button onClick={onBack} style={{
+          background: "none", border: "none", color: "#9CA3AF",
+          fontSize: 10, letterSpacing: 3, cursor: "pointer",
+          fontFamily: "'Space Mono', monospace", padding: 0, marginBottom: 24, display: "block",
+        }}>← COLLECTION</button>
+        
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+          <div>
+            <h1 style={{ 
+              fontSize: 32, fontWeight: "900", margin: 0, color: DARK, 
+              letterSpacing: "-1.5px", lineHeight: 1 
+            }}>{year}</h1>
+            <p style={{ 
+              fontSize: 11, color: "#6B7280", margin: "8px 0 0", 
+              letterSpacing: 2, textTransform: "uppercase" 
+            }}>Digital Archive</p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <span style={{ 
+              fontSize: 24, fontWeight: "300", color: DARK, 
+              fontFamily: "system-ui" 
+            }}>{recordedCount}</span>
+            <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 4 }}>/ 12</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Curation Grid */}
+      <div style={{ 
+        padding: "32px 20px 60px",
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: "24px 16px",
+        animation: "gridFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both"
+      }}>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((m, idx) => {
+          const record = yearData[m] || {};
+          const colIdx = (m - 1) % SPINE_COLORS.length;
+          
+          return (
+            <MonthlyTile 
+              key={m}
+              monthIdx={m - 1}
+              year={year}
+              record={record}
+              spineColor={SPINE_COLORS[colIdx]}
+              onClick={() => onSelectMonth(m, true)}
+              onAdd={() => onSelectMonth(m, false)}
+            />
+          );
+        })}
+      </div>
+
+      {/* Footer Info */}
+      <div style={{ padding: "0 24px 40px", textAlign: "center" }}>
+        <p style={{ fontSize: 9, color: "#9CA3AF", letterSpacing: 2, lineHeight: 2 }}>
+          갤러리 뷰에서 각 달의 기록을 확인하세요.<br/>
+          비어있는 슬롯을 눌러 새로운 음악과 일기를 채울 수 있습니다.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+
+      /* ─── YEAR GRID HOME (The Archives) ─── */
       function YearGrid({data, onSelectYear, onAddYear, onDeleteYear}) {
 const years = Object.keys(data).map(Number).sort((a,b) => b - a);
       const [deleteMode, setDeleteMode] = useState(false);
 
       return (
-      <div style={{ minHeight: "100vh", background: PAPER, fontFamily: "'Space Mono', monospace" }}>
-        <style>{`@keyframes cardIn { from { opacity:0; transform:translateY(10px); } to   { opacity:1; transform:translateY(0); } }`}</style>
+      <div style={{ minHeight: "100vh", background: "#F3F4F6", fontFamily: "'Space Mono', monospace" }}>
+        <style>{`
+          @keyframes cardIn { 
+            from { opacity:0; transform:translateY(20px); } 
+            to   { opacity:1; transform:translateY(0); } 
+          }
+          .year-card:active { transform: scale(0.98); }
+        `}</style>
 
-        {/* Top right: + and trash */}
+        {/* Top bar */}
         <div style={{
-          display: "flex", justifyContent: "flex-end", alignItems: "center",
-          padding: "40px 28px 0", gap: 22,
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "48px 24px 24px",
         }}>
-          {!deleteMode && (
-            <button onClick={onAddYear} style={{
-              background: "none", border: "none", cursor: "pointer",
-              fontSize: 30, color: "#1a1a1a", lineHeight: 1, padding: 0, fontWeight: 200,
-            }}>+</button>
-          )}
-          <button onClick={() => setDeleteMode(d => !d)} style={{
-            background: "none", border: "none", cursor: "pointer", padding: 0,
-            color: deleteMode ? BG : "#1a1a1a",
-          }}>
-            {deleteMode ? (
-              <span style={{ fontSize: 11, letterSpacing: 2, fontFamily: "'Space Mono', monospace", color: BG }}>취소</span>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14H6L5 6" />
-                <path d="M10 11v6M14 11v6" />
-                <path d="M9 6V4h6v2" />
-              </svg>
+          <div style={{ 
+            fontSize: 22, fontWeight: "900", letterSpacing: "-1px", color: DARK, 
+            fontFamily: "system-ui" 
+          }}>ARCHIVE</div>
+          
+          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            {!deleteMode && (
+              <button onClick={onAddYear} style={{
+                background: DARK, border: "none", cursor: "pointer",
+                width: 28, height: 28, borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#fff", fontSize: 18, fontWeight: "200",
+              }}>+</button>
             )}
-          </button>
+            <button onClick={() => setDeleteMode(d => !d)} style={{
+              background: "none", border: "none", cursor: "pointer", padding: 0,
+              color: deleteMode ? "#EF4444" : DARK,
+              fontSize: 10, letterSpacing: 2, fontWeight: "700"
+            }}>
+              {deleteMode ? "CANCEL" : "EDIT"}
+            </button>
+          </div>
         </div>
 
-        {/* Main title */}
-        <div style={{ padding: "16px 28px 16px", fontSize: 28, fontWeight: 900, letterSpacing: "-1px", color: DARK, fontFamily: "system-ui, -apple-system, sans-serif" }}>
-          VINYL DIARY
-        </div>
-
-        {/* 2-col grid */}
+        {/* 2-col layout with a focus on 'Physicality' */}
         <div style={{
-          padding: "16px 16px 60px",
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14,
+          padding: "0 20px 60px",
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20,
         }}>
           {years.map((y, yi) => {
             const yData = data[y] || {};
+            const count = Object.keys(yData).length;
 
             return (
               <div key={y}
+                className="year-card"
                 onClick={() => deleteMode ? onDeleteYear(y) : onSelectYear(y)}
                 style={{
                   cursor: "pointer",
-                  animation: `cardIn 0.35s ease ${yi * 0.06}s both`,
+                  animation: `cardIn 0.5s cubic-bezier(0.2, 1, 0.2, 1) ${yi * 0.1}s both`,
                   position: "relative",
+                  transition: "transform 0.2s ease",
                 }}>
 
                 {/* Delete badge */}
                 {deleteMode && (
                   <div style={{
-                    position: "absolute", top: -6, right: -6, zIndex: 10,
-                    width: 20, height: 20, borderRadius: "50%",
-                    background: BG, color: CREAM,
+                    position: "absolute", top: -8, left: -8, zIndex: 10,
+                    width: 24, height: 24, borderRadius: "50%",
+                    background: "#EF4444", color: "#fff",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 14, fontWeight: "bold", lineHeight: 1,
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                    fontSize: 18, fontWeight: "bold",
+                    boxShadow: "0 4px 10px rgba(239,68,68,0.3)",
                   }}>−</div>
                 )}
 
-                {/* Card */}
+                {/* Physical Object Card */}
                 <div style={{
-                  border: `1px solid ${deleteMode ? "#e0b0b0" : "#d8d4ce"}`,
-                  borderRadius: 3,
-                  background: deleteMode ? "#fff8f8" : "#fff",
-                  aspectRatio: "4/3",
+                  borderRadius: "12px",
+                  background: "#fff",
+                  aspectRatio: "3/4",
                   overflow: "hidden",
+                  padding: "16px",
                   display: "flex",
-                  alignItems: "flex-end",
-                  padding: "10px 9px",
-                  transition: "border-color 0.2s, background 0.2s",
-                }}
-                  onMouseEnter={e => { if (!deleteMode) e.currentTarget.style.borderColor = "#aaa"; }}
-                  onMouseLeave={e => { if (!deleteMode) e.currentTarget.style.borderColor = "#d8d4ce"; }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: "78%" }}>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => {
-                      const has = !!yData[m];
-                      return (
-                        <div key={m} style={{
-                          width: has ? 7 : 4,
-                          height: has ? "85%" : "28%",
-                          background: has ? SPINE_COLORS[(m - 1) % SPINE_COLORS.length] : "#E2E5EA",
-                          borderRadius: "1px 1px 0 0",
-                          flexShrink: 0,
-                          alignSelf: "flex-end",
-                        }} />
-                      );
-                    })}
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(0,0,0,0.03)",
+                  transition: "box-shadow 0.3s ease",
+                }}>
+                  {/* Visual Abstract of the year */}
+                  <div style={{ 
+                    flex: 1, display: "grid", 
+                    gridTemplateColumns: "repeat(4, 1fr)", 
+                    gridTemplateRows: "repeat(3, 1fr)", 
+                    gap: 3, padding: "8px 0"
+                  }}>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                      <div key={m} style={{ 
+                        background: yData[m] ? SPINE_COLORS[(m-1)%SPINE_COLORS.length] : "#F3F4F6",
+                        borderRadius: "1.5px",
+                        opacity: yData[m] ? 1 : 0.5
+                      }} />
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 18, fontWeight: "900", color: DARK, letterSpacing: "-1px" }}>{y}</div>
+                    <div style={{ fontSize: 8, color: "#9CA3AF", letterSpacing: 1, marginTop: 2 }}>{count} RECORDS</div>
                   </div>
                 </div>
-
-                {/* Year below */}
-                <div style={{
-                  textAlign: "center", fontSize: 11,
-                  color: deleteMode ? BG : "#999",
-                  letterSpacing: 1, marginTop: 7,
-                }}>{y}</div>
               </div>
             );
           })}
 
-          {/* Empty filler slots */}
-          {!deleteMode && Array.from({ length: Math.max(0, 6 - years.length) }).map((_, i) => (
-            <div key={`e-${i}`} onClick={i === 0 ? onAddYear : undefined} style={{ animation: `cardIn 0.35s ease ${(years.length + i) * 0.06}s both`, cursor: i === 0 ? "pointer" : "default" }}>
-              <div style={{ border: "1px solid #DFE3E8", borderRadius: 3, background: "#F4F6F9", aspectRatio: "4/3", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {i === 0 && <span style={{ fontSize: 40, color: "#A5ACB5", fontWeight: "300" }}>+</span>}
+          {/* New Year Placeholder */}
+          {!deleteMode && (
+            <div onClick={onAddYear} style={{ animation: `cardIn 0.5s cubic-bezier(0.2, 1, 0.2, 1) ${years.length * 0.1}s both`, cursor: "pointer" }}>
+              <div style={{ 
+                borderRadius: "12px", border: "1.5px dashed #D1D5DB", 
+                background: "rgba(255,255,255,0.5)", aspectRatio: "3/4", 
+                display: "flex", alignItems: "center", justifyContent: "center" 
+              }}>
+                <span style={{ fontSize: 32, color: "#9CA3AF", fontWeight: "200" }}>+</span>
               </div>
-              <div style={{ height: 26 }} />
             </div>
-          ))}
+          )}
         </div>
       </div>
       );
@@ -1036,7 +1050,10 @@ if (screen === "detail") {
       monthLabel={MONTHS_KR[selectedMonth - 1]}
       yearLabel={String(selectedYear)}
       onBack={() => setScreen("year")}
-      onSave={handleSaveRecord}
+      onSave={(form) => {
+        handleSaveRecord(form);
+        setScreen("year"); // Auto-return to grid after saving
+      }}
       initialEdit={startEdit}
     />
   );
