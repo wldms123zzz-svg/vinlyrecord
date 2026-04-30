@@ -668,23 +668,25 @@ function MonthlyTile({ monthIdx, year, record, onClick, onAdd, spineColor }) {
         width: "100%",
         aspectRatio: "1/1",
         cursor: "pointer",
-        transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease",
-        transform: isPressed ? "scale(0.95) translateY(2px)" : "scale(1) translateY(0)",
+        transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        transform: isPressed ? "scale(0.96) rotateX(10deg)" : "scale(1) rotateX(5deg)", // Leaning effect
         perspective: "1000px",
+        transformOrigin: "bottom center",
+        zIndex: isPressed ? 10 : 1,
       }}
     >
       <div style={{
         width: "100%",
         height: "100%",
-        background: hasRecord ? (record.photo ? "#000" : CREAM) : "rgba(255,255,255,0.4)",
-        border: hasRecord ? "none" : "1px dashed rgba(0,0,0,0.08)",
-        borderRadius: "2px",
+        background: hasRecord ? (record.photo ? "#111" : CREAM) : "rgba(255,255,255,0.6)",
+        border: hasRecord ? "none" : "1.5px dashed rgba(0,0,0,0.06)",
+        borderRadius: "1px",
         overflow: "hidden",
         position: "relative",
-        // Tactile Bezel & Shadow
+        // Wall-cast shadow (leaning shadow)
         boxShadow: hasRecord 
-          ? "0 10px 20px -5px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.1)"
-          : "inset 0 1px 3px rgba(0,0,0,0.02)",
+          ? "0 15px 30px -10px rgba(0,0,0,0.3), 0 5px 15px -5px rgba(0,0,0,0.2)"
+          : "none",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -692,47 +694,47 @@ function MonthlyTile({ monthIdx, year, record, onClick, onAdd, spineColor }) {
         {hasRecord ? (
           <>
             {record.photo ? (
-              <GrayscaleImg src={record.photo} style={{ width: "100%", height: "100%", opacity: 0.9, filter: "contrast(1.1) brightness(0.9)" }} />
+              <GrayscaleImg src={record.photo} style={{ width: "100%", height: "100%", opacity: 0.9, filter: "contrast(1.05) brightness(0.95)" }} />
             ) : (
               <div style={{ 
                 width: "100%", height: "100%", 
                 display: "flex", flexDirection: "column", 
                 alignItems: "center", justifyContent: "center",
                 padding: 12, textAlign: "center",
-                background: `linear-gradient(135deg, ${CREAM} 0%, #DFE3E8 100%)`
+                background: `linear-gradient(135deg, ${CREAM} 0%, #E2E4E8 100%)`
               }}>
-                <div style={{ fontSize: 9, fontWeight: "800", color: DARK, opacity: 0.8, letterSpacing: "-0.2px" }}>{record.song}</div>
+                <div style={{ fontSize: 9, fontWeight: "900", color: DARK, opacity: 0.7, letterSpacing: "-0.2px" }}>{record.song}</div>
               </div>
             )}
-            {/* Spine Highlight */}
+            {/* Spine Highlight - like a label */}
             <div style={{ 
               position: "absolute", left: 0, top: 0, bottom: 0, width: 4, 
               background: spineColor, 
-              boxShadow: "1px 0 3px rgba(0,0,0,0.2)"
+              boxShadow: "1px 0 2px rgba(0,0,0,0.1)"
             }} />
           </>
         ) : (
           <div style={{ 
             display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-            opacity: 0.15
+            opacity: 0.12
           }}>
             <span style={{ fontSize: 7, letterSpacing: 2, fontWeight: "900", color: DARK }}>{monthLabel}</span>
-            <div style={{ width: 12, height: 1, background: DARK }} />
+            <div style={{ width: 10, height: 1, background: DARK }} />
           </div>
         )}
 
-        {/* Gloss / Physicality Overlay */}
+        {/* Texture/Paper Overlay */}
         <div style={{ 
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(165deg, rgba(255,255,255,0.08) 0%, transparent 40%, rgba(0,0,0,0.03) 100%)"
+          background: "linear-gradient(165deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.02) 100%)"
         }} />
       </div>
       
-      {/* Label below tile */}
+      {/* Label - hidden or very subtle to keep 'clean' look */}
       <div style={{ 
-        marginTop: 6, textAlign: "center", fontSize: 8, 
-        letterSpacing: 1, color: hasRecord ? DARK : "#aaa", 
-        fontWeight: hasRecord ? "700" : "400",
+        marginTop: 8, textAlign: "center", fontSize: 7, 
+        letterSpacing: 2, color: hasRecord ? DARK : "transparent", 
+        fontWeight: "900", opacity: 0.4,
         fontFamily: "'Space Mono', monospace"
       }}>
         {monthLabel}
@@ -743,82 +745,101 @@ function MonthlyTile({ monthIdx, year, record, onClick, onAdd, spineColor }) {
 
 function YearDrawer({ year, data, onBack, onSelectMonth }) {
   const yearData = data[year] || {};
-  const recordedCount = Object.keys(yearData).length;
+  const rows = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+  ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F9FAFB", fontFamily: "'Space Mono', monospace" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f2", fontFamily: "'Space Mono', monospace" }}>
       <style>{`
-        @keyframes gridFadeIn {
-          from { opacity: 0; transform: translateY(10px); }
+        @keyframes shelfFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
 
-      {/* Header - White Cube Style */}
+      {/* Header - Clean Gallery Look */}
       <div style={{
-        padding: "40px 24px 32px",
-        background: "#fff",
-        borderBottom: "1px solid #E5E7EB",
+        padding: "50px 32px 20px",
+        background: "transparent",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-end"
       }}>
-        <button onClick={onBack} style={{
-          background: "none", border: "none", color: "#9CA3AF",
-          fontSize: 10, letterSpacing: 3, cursor: "pointer",
-          fontFamily: "'Space Mono', monospace", padding: 0, marginBottom: 24, display: "block",
-        }}>← COLLECTION</button>
-        
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <div>
-            <h1 style={{ 
-              fontSize: 32, fontWeight: "900", margin: 0, color: DARK, 
-              letterSpacing: "-1.5px", lineHeight: 1 
-            }}>{year}</h1>
-            <p style={{ 
-              fontSize: 11, color: "#6B7280", margin: "8px 0 0", 
-              letterSpacing: 2, textTransform: "uppercase" 
-            }}>Digital Archive</p>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ 
-              fontSize: 24, fontWeight: "300", color: DARK, 
-              fontFamily: "system-ui" 
-            }}>{recordedCount}</span>
-            <span style={{ fontSize: 10, color: "#9CA3AF", marginLeft: 4 }}>/ 12</span>
-          </div>
+        <div>
+          <button onClick={onBack} style={{
+            background: "none", border: "none", color: "#888",
+            fontSize: 9, letterSpacing: 3, cursor: "pointer",
+            fontFamily: "'Space Mono', monospace", padding: 0, marginBottom: 16, display: "block",
+          }}>← GALLERY</button>
+          <h1 style={{ 
+            fontSize: 40, fontWeight: "900", margin: 0, color: DARK, 
+            letterSpacing: "-2px", lineHeight: 0.9 
+          }}>{year}</h1>
+        </div>
+        <div style={{ textAlign: "right", opacity: 0.3 }}>
+          <div style={{ fontSize: 8, letterSpacing: 2, marginBottom: 4 }}>COLLECTION STATE</div>
+          <div style={{ fontSize: 18, fontWeight: "300", color: DARK }}>{Object.keys(yearData).length} / 12</div>
         </div>
       </div>
 
-      {/* Curation Grid */}
-      <div style={{ 
-        padding: "32px 20px 60px",
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "24px 16px",
-        animation: "gridFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both"
-      }}>
-        {Array.from({ length: 12 }, (_, i) => i + 1).map((m, idx) => {
-          const record = yearData[m] || {};
-          const colIdx = (m - 1) % SPINE_COLORS.length;
-          
-          return (
-            <MonthlyTile 
-              key={m}
-              monthIdx={m - 1}
-              year={year}
-              record={record}
-              spineColor={SPINE_COLORS[colIdx]}
-              onClick={() => onSelectMonth(m, true)}
-              onAdd={() => onSelectMonth(m, false)}
-            />
-          );
-        })}
+      {/* Wall Display (Shelves) */}
+      <div style={{ padding: "0 24px 80px" }}>
+        {rows.map((row, rowIdx) => (
+          <div key={rowIdx} style={{ 
+            position: "relative",
+            marginTop: 40,
+            animation: `shelfFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${rowIdx * 0.15}s both`
+          }}>
+            {/* The Grid of Records */}
+            <div style={{ 
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "16px",
+              padding: "0 8px 10px",
+            }}>
+              {row.map(m => {
+                const record = yearData[m] || {};
+                const colIdx = (m - 1) % SPINE_COLORS.length;
+                return (
+                  <MonthlyTile 
+                    key={m}
+                    monthIdx={m - 1}
+                    year={year}
+                    record={record}
+                    spineColor={SPINE_COLORS[colIdx]}
+                    onClick={() => onSelectMonth(m, true)}
+                    onAdd={() => onSelectMonth(m, false)}
+                  />
+                );
+              })}
+            </div>
+
+            {/* The Shelf Rail (Wall Rail) */}
+            <div style={{ 
+              height: 4, 
+              background: "#fff", 
+              borderRadius: 2,
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05), inset 0 1px 0 rgba(0,0,0,0.02)",
+              margin: "0 -8px"
+            }} />
+          </div>
+        ))}
       </div>
 
-      {/* Footer Info */}
-      <div style={{ padding: "0 24px 40px", textAlign: "center" }}>
-        <p style={{ fontSize: 9, color: "#9CA3AF", letterSpacing: 2, lineHeight: 2 }}>
-          갤러리 뷰에서 각 달의 기록을 확인하세요.<br/>
-          비어있는 슬롯을 눌러 새로운 음악과 일기를 채울 수 있습니다.
-        </p>
+      {/* Bottom Storage Hint (Modular look) */}
+      <div style={{ 
+        height: 100, 
+        background: "#fff", 
+        borderTop: "1px solid #e5e5e5",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: 0.5
+      }}>
+        <div style={{ fontSize: 8, letterSpacing: 5, color: "#aaa" }}>SYSTEM STORAGE / ARCHIVE</div>
       </div>
     </div>
   );
