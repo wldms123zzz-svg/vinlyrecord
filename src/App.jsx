@@ -819,11 +819,13 @@ function YearDrawer({ year, data, onBack, onSelectMonth }) {
 
             {/* The Shelf Rail (Wall Rail) */}
             <div style={{ 
-              height: 4, 
+              height: 3, 
               background: "#fff", 
-              borderRadius: 2,
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05), inset 0 1px 0 rgba(0,0,0,0.02)",
-              margin: "0 -8px"
+              borderRadius: 1,
+              boxShadow: "0 4px 8px rgba(0,0,0,0.03), inset 0 1px 0 rgba(0,0,0,0.01)",
+              margin: "0 -24px", // Full width of the display area
+              position: "relative",
+              zIndex: 0
             }} />
           </div>
         ))}
